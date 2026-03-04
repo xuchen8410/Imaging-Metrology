@@ -111,7 +111,51 @@ InAs / GaSb
 二维阵列：
 
 
-## 3. 光学设计
+
+
+
+
+# 5 噪声模型 (Noise Model)
+
+红外系统设计的关键。
+
+## 5.1 Shot Noise
+光子统计噪声：
+\[
+i_{shot}=\sqrt{2qI\Delta f}
+\]
+
+## 5.2 Johnson Noise
+
+热噪声：
+\[
+i_{johnson}=\sqrt{4kT\Delta f/R}
+\]
+
+## 5.3 1/f Noise
+低频电子噪声。
+影响：
+- 长时间积分
+- 低频系统
+
+## 5.4 Photon Noise
+光子统计噪声：
+\[
+\sigma_{photon} = \sqrt{N}
+\]
+N = photon count
+
+# 6 BLIP 条件
+
+BLIP：Background Limited Infrared Photodetection
+条件：
+
+
+
+
+
+
+### 光学设计
 Optical power distribution. TMAs consist of three conic mirrors: a concave primary (M1) that provides most of the converging power, a convex secondary (M2) that typically has negative optical power and relays the pupil, and a concave tertiary (M3) that refocuses the beam to a flat focal plane. In some designs a folding flat (M4) is included to redirect the optical path.
 三镜消像差系统曲率与一阶光学指标关系
 
