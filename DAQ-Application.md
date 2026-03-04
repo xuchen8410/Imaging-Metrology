@@ -49,16 +49,11 @@ The workflow integrates:
 - Model reconstruction and validation
   
 ##  4.System Measurement Architecture
-
-# Wavefront-Based Error Diagnosis + Error Model Rebuild (DAQ / WFS / Zernike)
-
-Goal: Use **measured wavefront shape** (WFE map / Zernike) + **DAQ sensors** (T, accel, strain) to:
-1) infer **which physical part** caused the error, and  
-2) rebuild a **parametric error model** for simulation / STOP / tolerance.
-
----
-
-## 1) End-to-End Architecture (Measurement → Diagnosis → Model Update)
+ - Wavefront-Based Error Diagnosis + Error Model Rebuild (DAQ / WFS / Zernike)
+ - Goal: Use **measured wavefront shape** (WFE map / Zernike) + **DAQ sensors** (T, accel, strain) to:    
+    1) infer **which physical part** caused the error, and  
+    2) rebuild a **parametric error model** for simulation / STOP / tolerance.
+####  End-to-End Architecture (Measurement → Diagnosis → Model Update)
 
 ```text
 [Optical Hardware]
@@ -102,6 +97,137 @@ Goal: Use **measured wavefront shape** (WFE map / Zernike) + **DAQ sensors** (T,
   - Update priors / regularization / coupling
   - Freeze into STOP / Monte-Carlo tolerance model
 
+```
 
+## 5.误差分析一些example
+Wavefront is diagnostic - because different physical errors produce distinct symmetry + Zernike signatures.
+ ### 5.1 Rigid-body misalignment (alignment / boresight / LOS)
+Signature:
+- Dominant Tilt (Z2/Z3)  -> LOS shift
+- Coma (Z7/Z8)           -> decenter/tilt of powered optic
+- Low high-frequency content (mostly low-order modes)
+Likely sources:
+- Mirror mount shift / fasteners slip
+- Kinematic seat motion
+- Mechanism backlash / actuator offset
+### 5.2 Spacing / focus (axial separation changes)
+Signature:
+- Defocus (Z4) dominant
+- Often correlated with uniform temperature or CTE-driven expansion
 
-'''
+Likely sources:
+- Barrel / bench expansion
+- Secondary spacing change
+- Focus mechanism error
+### 5.3 Mount stress / structural bending (quasi-static)
+Signature:
+- Astigmatism (Z5/Z6) dominant (2-lobed)
+- Sometimes plus coma depending on constraint geometry
+- Strong correlation with strain gauges or gravity vector
+
+Likely sources:
+- Over-constraint in mounts
+- Gravity sag in one axis
+- Thermal gradient across structure
+### 5.4 Surface figure deformation (mirror/lens figure)
+Signature:
+- Mid/high-order Zernikes elevated
+- Spatial WFE map shows localized features
+- PSD shows more mid/high-frequency energy
+
+Likely sources:
+- Thermoelastic figure change
+- Print-through from supports
+- Polishing/figure residuals (static)
+### 5.5 Vibration / jitter (dynamic)
+Signature:
+- Time-domain: WFE modes oscillate at specific frequencies
+- Tilt terms may spike with accelerometer peaks
+- If imaging: blur / jitter increases, MTF drops
+
+Likely sources:
+- Reaction wheels / cryocooler
+- Fan/pump harmonics
+- Structural resonance
+3) Diagnosis Workflow (From WFE to “Which Part”)
+Step 1: Preprocess
+- Align pupil / register WFE maps
+- Remove piston; optionally remove mean tilt if needed
+
+Step 2: Decompose
+- Fit Zernike: Z_k(t)
+- Compute: RMS(t), PV(t), PSD(f), symmetry metrics
+
+Step 3: Classify signature
+- Low-order dominated? -> alignment / spacing / sag
+- Astig-heavy?         -> mount stress / bench bend
+- Mid/high-order heavy?-> surface figure / print-through
+- Strong time tones?   -> vibration source
+
+Step 4: Correlate with DAQ
+- Corr(Z_k, T_i), Corr(Z_k, a_i), Corr(Z_k, g_i)
+- Look for time lag (thermal) vs instantaneous (vibration)
+
+Step 5: Hypothesis ranking
+- Choose top N causes
+- Convert to param vector p for model rebuild
+
+## 6. Error Model Rebuild (Parametric + Fit)
+
+Define a compact error state vector (example):
+
+p = [
+  θx, θy,            # rigid-body tilt
+  dx, dy, dz,        # decenter / spacing
+  A_ast0, A_ast45,   # astig components (mount/sag)
+  A_comaX, A_comaY,  # coma components (decenter/tilt)
+  {A_fig_m}          # selected surface/thermal modes
+]
+
+Forward model:
+
+WFE_pred(x,y,t) = F(p, x, y)          # optical forward model
+Z_pred_k(t)     = G_k(p)              # if fitting in Zernike space
+
+Fit / inference:
+
+p* = argmin_p  || Z_meas - Z_pred(p) ||^2  +  λ || L p ||^2
+(or Bayesian: p ~ N(p0, Σ0), update with likelihood)
+
+Validation:
+
+Compare:
+- Zernike residuals: Z_meas - Z_pred
+- Spatial residual map: WFE_meas - WFE_pred
+- Frequency residuals (if dynamic)
+5) “What Signal Might Be Caused By What” (DAQ Link Table)
+Observation (Wavefront/Perf)	Most sensitive DAQ channel	Typical cause
+Tilt spikes / LOS jitter	Accelerometers	vibration / resonance
+Defocus drift	Temperature (uniform)	CTE spacing change
+Astig grows with gravity angle	Strain + gravity vector	sag / over-constraint
+Coma increases after handling	none (event-based)	decenter/tilt shift
+Mid/high-order grows with thermal gradient	multi-point temperature	thermoelastic figure
+Random spikes (non-physical)	voltage/ground	EMI / grounding
+6) Minimal Test Steps (Paste-Ready)
+1) Baseline
+   - Record WFE(x,y,t) + DAQ sensors at steady state
+
+2) Thermal Step
+   - Apply controlled ΔT (uniform + gradient)
+   - Record WFE + T_i(t) to map thermal sensitivities
+
+3) Vibration Sweep
+   - Inject sine / random vibration (or measure operational)
+   - Record WFE + a_i(t) to find jitter coupling
+
+4) Gravity / Orientation
+   - Rotate / change elevation (if possible)
+   - Record WFE + strain to identify sag modes
+
+5) Alignment Perturbation
+   - Known small tilt/decenter (if allowed)
+   - Confirm signature library (coma/tilt mapping)
+
+6) Rebuild + Validate Model
+   - Fit p using the collected dataset
+   - Predict WFE under new condition and verify
