@@ -9,15 +9,14 @@
 | **VLWIR / FIR**          | >14 µm           | astronomy                           |
 
 
-atmospheric windows:
+**Atmospheric windows:**
 | Window   | Range      | Reason                            |
 | -------- | ---------- | --------------------------------- |
 | **SWIR** | 1–2.5 µm   | low atmospheric absorption        |
 | **MWIR** | 3–5 µm     | hot target emission               |
 | **LWIR** | 8–12/14 µm | room-temperature thermal emission |
 
-Transmission chart:
-
+**Glas transmission chart:**
 | Material               | Transmission Range | Notes                         |
 | ---------------------- | ------------------ | ----------------------------- |
 | **Fused Silica**       | 0.18 – 3.5 µm      | VIS + NIR                     |
@@ -32,7 +31,7 @@ Transmission chart:
 | **ZnSe**               | **0.5 – 20 µm**    | CO₂ laser optics              |
 | **Chalcogenide glass** | **1 – 14 µm**      | molded IR optics              |
 
-
+**Mirror materials:** SiC, Aluminum, Zerodur, ULE
 
 # 1 Infrared Radiation Physics
 红外探测的基础来自 **热辐射物理 (Thermal Radiation)**。
