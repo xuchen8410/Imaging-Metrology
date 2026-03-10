@@ -4,9 +4,29 @@ An optical imaging system “error budget” is most useful when it follows the 
 For common camera-lens architectures, principal planes and pupils are the “hidden geometry” that explains why the same focal length can package very differently. 
 * A telephoto objective is explicitly characterized by system focal length longer than overall system length, enabled by placing net positive power up front and net negative power toward the rear;
 * a retrofocus (inverse-telephoto) objective is the “mirror-clearance” inverse: net negative power in front followed by net positive power, producing a back focal distance larger than the focal length. 
+*  MTF_total(f) = MTF_optics(f) * MTF_pixel(f) * MTF_motion(f) * MTF_detector(f)
+* Sampling Ratio (Q)： Sampling ratio describes how well the detector samples the optical resolution.
+    - Q = fN / fc， where fN = 1 / (2p)-- (detector Nyquist frequency)； fc ≈ 1 / (λ · F#)  (optical cutoff frequency)；
+    - Q = (λ · F#) / (2p)， where - λ = wavelength； - F# = f-number； - p = pixel pitch  
 
-For incoherent imaging, OTF(fx, fy) = FT{PSF(x, y)} and MTF = abs(OTF). 
-When subsystems are approximately linear shift-invariant, MTF_total ≈ Π MTF_i (lens × detector × motion, etc.).
+### Sampling regimes
+
+| Q value | Sampling regime | Interpretation |
+|---|---|---|
+| Q < 1 | Under-sampled | detector cannot sample optical detail → aliasing |
+| Q ≈ 1 | Matched | optics and detector resolution are balanced |
+| Q > 1 | Oversampled | detector samples finer than optical resolution |
+
+Engineering guideline： Typical imaging systems target: 1 ≤ Q ≤ 2。 This avoids aliasing while maintaining good detector SNR.
+​
+  | Sampling regime | Condition | Consequence                              |
+  | --------------- | --------- | ---------------------------------------- |
+  | Under-sampled   | Q < 1     | Aliasing, resolution limited by detector |
+  | Matched         | Q ≈ 1     | Balanced optics and detector             |
+  | Oversampled     | Q > 1     | Detector exceeds optical resolution      |
+
+* For incoherent imaging, OTF(fx, fy) = FT{PSF(x, y)} and MTF = abs(OTF). 
+* When subsystems are approximately linear shift-invariant, MTF_total ≈ Π MTF_i (lens × detector × motion, etc.).
 
 ## Optical Imaging System Error Budget Table
 
