@@ -82,7 +82,7 @@ MEMS scanning enables:
 • precise beam steering  
 • micron-scale targeting  
 • rapid switching between imaging and ablation modes.
-# 8. Typical MEMS Probe Optical Architecture
+#### 8. Typical MEMS Probe Optical Architecture
 laser source
     ↓
 single-mode delivery fiber
